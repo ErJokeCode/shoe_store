@@ -13,7 +13,7 @@ ALGORITHM = os.getenv('ALGORITHM')
 ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv('ACCESS_TOKEN_EXPIRE_MINUTES'))
 
 DB = MongoDataBase(
-    host="localhost", 
+    host="serverdb", 
     port=27017, 
     name_db="shoe_store", 
     sp_name=NAME_SUPERUSER,

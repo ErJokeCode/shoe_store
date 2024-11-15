@@ -1,0 +1,9 @@
+.title {
+    margin-bottom: 50px;
+}
+
+.list_catalog {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 50px;
+}

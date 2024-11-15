@@ -8,7 +8,7 @@ import { AppProvider } from '@toolpad/core/AppProvider';
 import { DashboardLayout } from '@toolpad/core/DashboardLayout';
 import { useDemoRouter } from '@toolpad/core/internal';
 import { PageContainer } from '@toolpad/core/PageContainer';
-import StudentTable from '../../components/table/table';
+import StudentTable from '../components/table/table';
 import { useNavigate } from "react-router-dom";
 import PersonIcon from '@mui/icons-material/Person';
 import LaptopChromebookIcon from '@mui/icons-material/LaptopChromebook';
