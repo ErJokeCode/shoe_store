@@ -15,7 +15,8 @@ import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import { AppProvider } from '@toolpad/core/AppProvider';
 import { SignInPage } from '@toolpad/core/SignInPage';
 import { useTheme } from '@mui/material/styles';
-import axios from 'axios'
+import axios, { Axios } from 'axios'
+import { useNavigate } from "react-router-dom";
 
 const providers = [{ id: 'credentials', name: 'Email and Password' }];
 
@@ -103,13 +104,19 @@ function CustomButton() {
 
 export default function SlotsSignIn() {
   const theme = useTheme();
+  const nav = useNavigate()
   return (
     <AppProvider theme={theme}>
       <SignInPage
         signIn={async(provider, formData) => {
-          let email = formData.get('email')
-          let password = formData.get('password')
-          // const {data} = await axios.post(`${process.env.REACT_APP_SERVER_URL}/token`, {username: email, password: password})
+          const form = new FormData()
+          form.append('username', formData.get('email'))
+          form.append('password', formData.get('password'))
+
+          const { data } = await axios.post(`http://${process.env.REACT_APP_SERVER_URL}/token`, form)
+
+          sessionStorage.setItem('token', data['access_token'])
+          nav('/admin_panel')
         }
         }
         slots={{

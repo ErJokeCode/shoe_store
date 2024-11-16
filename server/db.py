@@ -4,7 +4,7 @@ from pymongo import MongoClient
 from passlib.context import CryptContext
 from pymongo.collection import Collection
 
-from schemas import UserInDB
+from schemas import ShoeInDB, UserInDB
 
 class MongoDataBase():
     def __init__(self, host: str, port: int, name_db: str, sp_name: str, sp_password: str):
@@ -15,6 +15,7 @@ class MongoDataBase():
         self.__db = client[self.__name_db]
 
         self.__user_collection = WorkerUserCollection(self.__db["users"])
+        self.__shoe_collection = WorkerShoeCollection(self.__db["shoe"])
 
         self.__add_superuser(sp_name, sp_password)
 
@@ -41,6 +42,10 @@ class MongoDataBase():
     def worker_user_collection(self):
         return self.__user_collection
     
+    
+    def worker_shoe_collection(self):
+        return self.__shoe_collection
+    
 
 class WorkerCollection():
     def __init__(self, collection: Collection, class_in_db: BaseModel):
@@ -56,12 +61,12 @@ class WorkerCollection():
         return self.__class_in_db(**item)
 
 
-    def get_all(self, limit: int):
+    def get_all(self, limit: int, find: dict = None):
         if limit == None:
             limit = 10
         i = 1
         items = []
-        for item in self.__collection.find():
+        for item in self.__collection.find(find):
             if i <= limit:
                 i+=1
                 items.append(self.__class_in_db(**item))
@@ -93,4 +98,25 @@ class WorkerUserCollection(WorkerCollection):
         return super().insert_one(user)
 
 
+class WorkerShoeCollection(WorkerCollection):
+    def __init__(self, collection: Collection):
+        super().__init__(collection, ShoeInDB)
+
+    
+    def get_one(self, number: str) -> ShoeInDB:
+        dict = {"number" : number}
+        return super().get_one(dict)
+
+
+    def get_all(self, limit: int) -> List[ShoeInDB]:
+        return super().get_all(limit)
+    
+
+    def get_sales(self, limit: int):
+        dict = {"sales" : True}
+        return super().get_all(limit, dict)
+    
+
+    def insert_one(self, shoe: ShoeInDB):
+        return super().insert_one(shoe)
     

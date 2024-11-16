@@ -1,4 +1,4 @@
-from typing import Annotated
+from typing import Annotated, List
 from fastapi import Form
 from pydantic import BaseModel
 
@@ -25,3 +25,12 @@ class UserInDB(User):
 class UserLogin(BaseModel):
     username: str
     password: str
+
+
+class ShoeInDB(BaseModel):
+    number: int
+    title: str
+    discr: str | None = None
+    sizes: List[str]
+    sales: bool = False
+    price: int

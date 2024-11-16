@@ -20,4 +20,5 @@ DB = MongoDataBase(
     sp_password=PASSWORD_SUPERUSER)
 
 WORKER_USER = DB.worker_user_collection()
+WORKER_SHOE = DB.worker_shoe_collection()
 

@@ -40,7 +40,7 @@ function DemoPageContent({ pathname, navigate }) {
         textAlign: 'center',
       }}
     >
-      {pathname.startsWith('/students') ? (<StudentTable/>) : null}
+      {pathname.startsWith('/all_shoes') ? (<StudentTable/>) : null}
     </Box>
   );
 }
@@ -64,59 +64,23 @@ const NAVIGATION = [
   },
   {
     kind: 'header',
-    title: 'Информация',
+    title: 'Обувь',
   },
   {
-    segment: 'students',
-    title: 'Студенты',
-    icon: <PersonIcon/>
-  },
-  {
-    segment: 'online_course',
-    title: 'Онлайн курсы',
-    icon: <LaptopChromebookIcon />,
-  },
-  {
-    kind: 'divider',
-  },
-  {
-    kind: 'header',
-    title: 'Analytics',
-  },
-  {
-    segment: 'reports',
-    title: 'Reports',
-    icon: <ShoppingCartIcon />,
-    children: [
-      {
-        segment: 'sales',
-        title: 'Sales',
-        icon: <ShoppingCartIcon />,
-      },
-      {
-        segment: 'traffic',
-        title: 'Traffic',
-        icon: <ShoppingCartIcon />,
-      },
-      {
-        segment: 'traffic',
-        title: 'Traffic',
-        icon: <ShoppingCartIcon />,
-        children: [
-          {
-            segment: 'sales',
-            title: 'Sales',
-            icon: <ShoppingCartIcon />,
-          }
-        ],
-      },
-    ],
-  },
-  {
-    segment: 'integrations',
-    title: 'Integrations',
+    segment: 'all_shoes',
+    title: 'Обувь',
     icon: <ShoppingCartIcon />,
   },
+  {
+    segment: 'sales_shoes',
+    title: 'В распродаже',
+    icon: <ShoppingCartIcon />,
+  },
+  {
+    segment: 'add_shoes',
+    title: 'Добавить',
+    icon: <ShoppingCartIcon />,
+  }
 ];
 
 function Navigate(props) {
