@@ -19,6 +19,6 @@ DB = MongoDataBase(
     sp_name=NAME_SUPERUSER,
     sp_password=PASSWORD_SUPERUSER)
 
-WORKER_USER = DB.worker_user_collection()
-WORKER_SHOE = DB.worker_shoe_collection()
+WORKER_USER = DB.Worker_user
+WORKER_SHOE = DB.Worker_shoe
 

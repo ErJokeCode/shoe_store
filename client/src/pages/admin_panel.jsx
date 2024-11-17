@@ -8,7 +8,8 @@ import { AppProvider } from '@toolpad/core/AppProvider';
 import { DashboardLayout } from '@toolpad/core/DashboardLayout';
 import { useDemoRouter } from '@toolpad/core/internal';
 import { PageContainer } from '@toolpad/core/PageContainer';
-import StudentTable from '../components/table/table';
+import ShoesTable from '../components/table/table';
+import Add_shoes from '../components/add_shoe/add_shoe';
 import { useNavigate } from "react-router-dom";
 import PersonIcon from '@mui/icons-material/Person';
 import LaptopChromebookIcon from '@mui/icons-material/LaptopChromebook';
@@ -40,7 +41,9 @@ function DemoPageContent({ pathname, navigate }) {
         textAlign: 'center',
       }}
     >
-      {pathname.startsWith('/all_shoes') ? (<StudentTable/>) : null}
+      {pathname.startsWith('/all_shoes') ? (<ShoesTable/>) : null}
+      {pathname.startsWith('/sales_shoes') ? (<ShoesTable is_sales={true}/>) : null}
+      {pathname.startsWith('/add_shoes') ? (<Add_shoes/>) : null}
     </Box>
   );
 }
