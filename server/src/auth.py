@@ -29,7 +29,7 @@ def get_password_hash(password):
 
 
 def authenticate_user(username: str, password: str):
-    user = WORKER_USER.get_one(username)
+    user = WORKER_USER.get_one(username = username)
     if not user:
         return False
     if not verify_password(password, user.hashed_password):

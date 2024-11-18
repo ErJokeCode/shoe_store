@@ -50,11 +50,11 @@ async def get_all_shoes(limit: int = None)->List[ShoeInDB]:
 
 @router.get("/sales")
 async def get_sales_shoes(limit: int = None):
-    return WORKER_SHOE.get_sales(limit)
+    return WORKER_SHOE.get_all(limit, sales=True)
 
 @router.get("/{number}")
 async def get_one_shoe(number: int):
-    return WORKER_SHOE.get_one(number)
+    return WORKER_SHOE.get_one(number=number)
 
 
 @router.post("/")

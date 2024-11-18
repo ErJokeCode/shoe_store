@@ -1,10 +1,14 @@
-from typing import List
+from typing import List, ParamSpec, Type, TypeVar, Generic, Sequence
+from typing_extensions import Unpack
 from pydantic import BaseModel
 from pymongo import MongoClient
 from passlib.context import CryptContext
 from pymongo.collection import Collection
 
 from schemas import ShoeInDB, UserInDB
+
+P = ParamSpec("P")
+T = TypeVar("T", bound=BaseModel)
 
 class MongoDataBase():
     def __init__(self, host: str, port: int, name_db: str, sp_name: str, sp_password: str):
@@ -14,8 +18,8 @@ class MongoDataBase():
         client = MongoClient(f'mongodb://{self.__host}:{self.__port}/')
         self.__db = client[self.__name_db]
 
-        self.Worker_user = WorkerUserCollection(self.__db["users"])
-        self.Worker_shoe = WorkerShoeCollection(self.__db["shoe"])
+        self.Worker_user = WorkerCollection[UserInDB](self.__db["users"], UserInDB)
+        self.Worker_shoe = WorkerCollection[ShoeInDB](self.__db["shoe"], ShoeInDB)
 
         self.__add_superuser(sp_name, sp_password)
 
@@ -30,7 +34,7 @@ class MongoDataBase():
             hashed_password=hash_password, 
             is_admin=True, 
             is_superuser=True)
-        if collect.get_one(superuser.username) == None:
+        if collect.get_one(username = superuser.username) == None:
             collect.insert_one(superuser)
 
 
@@ -39,20 +43,20 @@ class MongoDataBase():
         return pwd_context.hash(password)
     
 
-class WorkerCollection():
-    def __init__(self, collection: Collection, class_in_db: BaseModel):
+class WorkerCollection(Generic[T]):
+    def __init__(self, collection: Collection, class_db: T):
         self.__collection = collection
-        self.__class_in_db = class_in_db
+        self.cla = class_db
 
 
-    def get_one(self, **kwargs):
+    def get_one(self, **kwargs) -> T:
         item = self.__collection.find_one(kwargs)
         if item == None:
             return None
-        return self.__class_in_db(**item)
+        return self.cla(**item)
 
 
-    def get_all(self, limit: int, **kwargs):
+    def get_all(self, limit: int, **kwargs) -> T:
         if limit == None:
             limit = 10
         i = 1
@@ -60,53 +64,14 @@ class WorkerCollection():
         for item in self.__collection.find(kwargs):
             if i <= limit:
                 i+=1
-                items.append(self.__class_in_db(**item))
+                items.append(self.cla(**item))
             else:
                 break
         return items
 
 
-    def insert_one(self, item: BaseModel):
+    def insert_one(self, item: T) -> T:
         item = self.__collection.insert_one(item.model_dump())
         return item
-
-
-class WorkerUserCollection(WorkerCollection):
-    def __init__(self, collection: Collection):
-        super().__init__(collection, UserInDB)
-
-    
-    def get_one(self, username: str) -> UserInDB:
-        return super().get_one(username = username)
-
-
-    def get_all(self, limit: int) -> List[UserInDB]:
-        return super().get_all(limit)
-    
-
-    def insert_one(self, user: UserInDB):
-        return super().insert_one(user)
-
-
-class WorkerShoeCollection(WorkerCollection):
-    def __init__(self, collection: Collection):
-        super().__init__(collection, ShoeInDB)
-
-    
-    def get_one(self, number: str) -> ShoeInDB:
-        return super().get_one(number = number)
-
-
-    def get_all(self, limit: int) -> List[ShoeInDB]:
-        return super().get_all(limit)
-    
-
-    def get_sales(self, limit: int):
-        dict = {"sales" : True}
-        return super().get_all(limit, sales = True)
-    
-
-    def insert_one(self, shoe: ShoeInDB):
-        return super().insert_one(shoe)
     
 
