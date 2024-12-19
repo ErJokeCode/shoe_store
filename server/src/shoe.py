@@ -2,13 +2,13 @@ from datetime import datetime, timedelta, timezone
 from typing import Annotated, List, Optional
 
 import jwt
-from fastapi import Depends, APIRouter, HTTPException, status
+from fastapi import Depends, APIRouter, HTTPException, UploadFile, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from passlib.context import CryptContext
 
 from schemas import ShoeInDB, User, UserInDB, Token, TokenData
 from src.auth import oauth2_scheme
-from config import ALGORITHM, SECRET_KEY, WORKER_USER, WORKER_SHOE
+from config import ALGORITHM, SECRET_KEY, WORKER_USER, WORKER_SHOE, s3_client
 
 
 async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
@@ -61,8 +61,12 @@ async def get_one_shoe(number: int):
 async def add_shoe(
     shoe: Annotated[ShoeInDB, Depends()],
     current_user: Annotated[User, Depends(get_current_active_user)],
+    files: list[UploadFile]
 ):
     if current_user.is_admin:
-        shue = WORKER_SHOE.insert_one(shoe)
+        shoe = WORKER_SHOE.insert_one(shoe)
+        for i in range(len(files)):
+            res = await s3_client.upload_file(files[i], f"{shoe.number}{i}")
+            print(res)
         return shoe
     raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='Недостаточно прав!')
