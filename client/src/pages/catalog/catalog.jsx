@@ -7,6 +7,9 @@ import style from "../catalog/catalog.module.css"
 import { useState } from 'react';
 import axios from "axios"
 
+import Header from '../../components/header/header'
+import Footer from '../../components/footer/footer'
+import ListShoes from '../../components/list_shoes/list_shoes'
 
 
 export default function Catalog() {
@@ -31,15 +34,10 @@ export default function Catalog() {
 
     console.log(shoes)
     return (
-    <div class="container">
-        <h2 className={style.title}>Каталог</h2>
-        <ul className={style.list_catalog}>
-            {
-                shoes.map(shoe => {
-                    return <Card title={shoe.title} discr={shoe.discr} price={shoe.price} sizes={shoe.sizes}/>
-                })
-            }
-        </ul>
+    <div>
+      <Header></Header>
+      <ListShoes shoes={shoes}></ListShoes>
+      <Footer></Footer>
     </div>
   );
 }

@@ -1,0 +1,18 @@
+.header {
+    border-bottom: 1px solid #000;
+}
+
+.header_nav {
+    display: flex;
+    justify-content: space-between;
+}
+
+.menu {
+    display: flex;
+    gap: 20px;
+}
+
+.item_menu {
+    display: flex;
+    align-items: center;
+}

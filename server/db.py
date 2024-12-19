@@ -7,7 +7,6 @@ from pymongo.collection import Collection
 
 from schemas import ShoeInDB, UserInDB
 
-P = ParamSpec("P")
 T = TypeVar("T", bound=BaseModel)
 
 class MongoDataBase():
@@ -73,5 +72,3 @@ class WorkerCollection(Generic[T]):
     def insert_one(self, item: T) -> T:
         item = self.__collection.insert_one(item.model_dump())
         return item
-    
-

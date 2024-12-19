@@ -1,0 +1,16 @@
+.footer {
+    border-top: 1px solid #000;
+}
+
+.footer_info {
+    display: flex;
+    justify-content: space-between;
+}
+
+.footer__contacts {
+
+}
+
+.footer__secial {
+    
+}
