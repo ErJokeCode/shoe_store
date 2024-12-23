@@ -20,15 +20,19 @@ export default function Add_shoes() {
             is_sales = false
         }
 
-        const params = {
-            number: parseInt(num),
-            title: title,
-            discr: discr, 
-            sales: is_sales, 
-            price: parseInt(price)
-          }
+        var split_sizes = sizes.split()
+        var float_sizes = []
+        split_sizes.forEach(size => {
+          float_sizes.push(parseFloat(size))
+        });
 
-        const data = sizes.split();
+        var data = {
+          "title" : title, 
+          "discr" : discr, 
+          "sales" : is_sales, 
+          "price" : price, 
+          "sizes" : float_sizes
+        }
 
         const config = {
             headers: {
@@ -37,7 +41,7 @@ export default function Add_shoes() {
           };
         
 
-        await axios.post(`http://${process.env.REACT_APP_SERVER_URL}/shoe`, data, { params, ...config })
+        await axios.post(`http://${process.env.REACT_APP_SERVER_URL}/shoe`, data, { ...config })
 
 
         setNum("")

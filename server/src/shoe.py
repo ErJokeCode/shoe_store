@@ -2,11 +2,11 @@ from datetime import datetime, timedelta, timezone
 from typing import Annotated, List, Optional
 
 import jwt
-from fastapi import Depends, APIRouter, HTTPException, UploadFile, status
+from fastapi import Body, Depends, APIRouter, File, Form, HTTPException, UploadFile, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from passlib.context import CryptContext
 
-from schemas import ShoeInDB, User, UserInDB, Token, TokenData
+from schemas import Shoe, ShoeInDB, User, UserInDB, Token, TokenData
 from src.auth import oauth2_scheme
 from config import ALGORITHM, SECRET_KEY, WORKER_USER, WORKER_SHOE, s3_client
 
@@ -44,29 +44,106 @@ router = APIRouter(
     )
 
 @router.get("/")
-async def get_all_shoes(limit: int = None)->List[ShoeInDB]:
+async def get_all_shoes(limit: int = None) -> list[ShoeInDB]:
     return WORKER_SHOE.get_all(limit)
     
 
 @router.get("/sales")
-async def get_sales_shoes(limit: int = None):
+async def get_sales_shoes(limit: int = None) -> list[ShoeInDB]:
     return WORKER_SHOE.get_all(limit, sales=True)
 
-@router.get("/{number}")
-async def get_one_shoe(number: int):
-    return WORKER_SHOE.get_one(number=number)
+@router.get("/{id}")
+async def get_one_shoe(id: str) -> ShoeInDB:
+    return WORKER_SHOE.get_one(id=id)
 
 
 @router.post("/")
 async def add_shoe(
-    shoe: Annotated[ShoeInDB, Depends()],
     current_user: Annotated[User, Depends(get_current_active_user)],
-    files: list[UploadFile]
-):
+    shoe: Annotated[Shoe, Body()]
+) -> ShoeInDB:
+
     if current_user.is_admin:
-        shoe = WORKER_SHOE.insert_one(shoe)
-        for i in range(len(files)):
-            res = await s3_client.upload_file(files[i], f"{shoe.number}{i}")
-            print(res)
+        shoe = WORKER_SHOE.insert_one(shoe)        
         return shoe
+    
+    raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='Недостаточно прав!')
+
+@router.post("/{id}/photos")
+async def add_photos_shoe(
+    id: str,
+    current_user: Annotated[User, Depends(get_current_active_user)],
+    photos: list[UploadFile] = File(default=None)
+) -> ShoeInDB:
+    
+    if photos == None:
+        photos = []
+        
+    if current_user.is_admin:
+        shoe = WORKER_SHOE.get_one(id=id)
+        for i in range(len(photos)):
+            try:
+                res = await s3_client.upload_file(photos[i], f"{shoe.id}_{i}")
+                shoe.photos.append(res)
+            except Exception as e:
+                print(e)
+        
+        shoe = WORKER_SHOE.update_one(shoe)
+            
+        return shoe
+    
+    raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='Недостаточно прав!')
+
+
+@router.put("/{id}")
+async def update_shoe(
+    id: str,
+    shoe: Annotated[Shoe, Body()],
+    current_user: Annotated[User, Depends(get_current_active_user)],
+) -> ShoeInDB:
+    if current_user.is_admin:
+        shoe_db = WORKER_SHOE.get_one(id=id)
+        
+        shoe_db.title = shoe.title
+        shoe_db.discr = shoe.discr
+        shoe_db.sales = shoe.sales
+        shoe_db.price = shoe.price
+            
+        shoe = WORKER_SHOE.update_one(shoe_db)
+        return shoe
+        
+    raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='Недостаточно прав!')
+
+@router.delete("/{id}/photos")
+async def update_photos_shoe(
+    id: str,
+    current_user: Annotated[User, Depends(get_current_active_user)],
+    names_photos: list[str] = None,
+) -> ShoeInDB:
+    if names_photos == None:
+        photos = []
+    
+    if current_user.is_admin:
+        shoe = WORKER_SHOE.get_one(id=id)
+        
+        for name in names_photos:
+            if name in shoe.photos:
+                await s3_client.delete_file(name)
+                shoe.photos.remove(name)
+                
+        shoe = WORKER_SHOE.update_one(shoe)
+            
+        return shoe
+    
+    raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='Недостаточно прав!')
+
+@router.delete("/{id}")
+async def delete_shoe(
+    id: str,
+    current_user: Annotated[User, Depends(get_current_active_user)],
+) -> dict:
+    
+    if current_user.is_admin:
+        return WORKER_SHOE.delete_one(id)
+        
     raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='Недостаточно прав!')

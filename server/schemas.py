@@ -1,8 +1,10 @@
-from typing import Annotated, List
+from typing import Annotated, List, Optional
 from typing import TypedDict
 from fastapi import Form
-from pydantic import BaseModel
+from pydantic import BaseModel, BeforeValidator, Field, HttpUrl
 
+
+PyObjectId = Annotated[str, BeforeValidator(str)]
 
 class Token(BaseModel):
     access_token: str
@@ -18,20 +20,24 @@ class User(BaseModel):
     is_admin: bool = True
     is_superuser: bool = False
 
-
-class UserInDB(User):
-    hashed_password: str
-
-
 class UserLogin(BaseModel):
     username: str
     password: str
+    
+class UserInDB(User):
+    id: Optional[PyObjectId] = Field(alias="_id", default=None)
+    hashed_password: str
 
 
-class ShoeInDB(BaseModel):
-    number: int
-    title: str
-    discr: str | None = None
-    sizes: List[str]
+
+class Shoe(BaseModel):
+    title: str = Field(max_length=100)
+    discr: str = Field(default="", max_length=3000)
+    sizes: List[Annotated[float, Field(ge=10, le=60)]]
     sales: bool = False
-    price: int
+    price: float
+
+class ShoeInDB(Shoe):
+    id: Optional[PyObjectId] = Field(alias="_id", default=None)
+    photos: list[str] = []
+    
